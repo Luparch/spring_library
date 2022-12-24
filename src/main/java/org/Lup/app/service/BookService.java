@@ -3,9 +3,10 @@ package org.Lup.app.service;
 import org.Lup.app.dto.BookDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BookService {
-    BookDto getBookById(Integer id);
+    Optional<BookDto> getBookById(Integer id);
 
     void deleteBookById(Integer id);
 

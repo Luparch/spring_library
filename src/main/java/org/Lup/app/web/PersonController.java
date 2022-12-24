@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = WebConstant.VERSION_URL + "/person",
@@ -21,9 +22,8 @@ public class PersonController {
     }
 
     @GetMapping("/get/{personId}")
-    public PersonResponse getPerson(@PathVariable Integer personId){
-        PersonResponse response = facade.getPersonById(personId);
-        return response;
+    public Optional<PersonResponse> getPerson(@PathVariable Integer personId){
+        return facade.getPersonById(personId);
     }
 
     @GetMapping("/get")

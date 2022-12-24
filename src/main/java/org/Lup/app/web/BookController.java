@@ -1,5 +1,6 @@
 package org.Lup.app.web;
 
+import org.Lup.app.exception.DomainException;
 import org.Lup.app.facade.Facade;
 import org.Lup.app.web.constant.WebConstant;
 import org.Lup.app.web.request.BookRequest;
@@ -8,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = WebConstant.VERSION_URL + "/book",
@@ -20,9 +22,8 @@ public class BookController {
     }
 
     @GetMapping("/get/{bookId}")
-    public BookResponse getBook(@PathVariable Integer bookId){
-        BookResponse response = facade.getBookById(bookId);
-        return response;
+    public Optional<BookResponse> getBook(@PathVariable Integer bookId){
+        return facade.getBookById(bookId);
     }
 
     @GetMapping("/get")
@@ -43,12 +44,12 @@ public class BookController {
     }
 
     @PutMapping("/update/{bookId}")
-    public void updateBook(@PathVariable Integer bookId, @RequestBody BookRequest request){
+    public void updateBook(@PathVariable Integer bookId, @RequestBody BookRequest request) throws DomainException {
         facade.updateBookById(bookId, request);
     }
 
     @PostMapping("/create")
-    public void createBook(@RequestBody BookRequest request){
+    public void createBook(@RequestBody BookRequest request) throws DomainException {
         facade.createBook(request);
     }
 

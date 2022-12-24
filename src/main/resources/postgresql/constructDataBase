@@ -1,0 +1,31 @@
+CREATE TABLE books(
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    title citext NOT NULL,
+    author citext NOT NULL
+);
+
+CREATE TABLE persons(
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name citext NOT NULL,
+    second_name citext NOT NULL,
+    patronymic citext NOT NULL DEFAULT '',
+    birth_date date NOT NULL
+);
+
+CREATE TABLE persons_borrowed_books(
+    person_id integer REFERENCES persons ON DELETE RESTRICT ON UPDATE CASCADE,
+    book_id integer REFERENCES books ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (person_id, book_id)
+);
+
+CREATE FUNCTION check_absence() RETURNS trigger
+AS $$
+    BEGIN
+        IF OLD IS NULL THEN RAISE triggered_action_exception;
+        END IF;
+    END;
+$$ STABLE LANGUAGE plpgsql;
+
+CREATE TRIGGER cannot_return_if_absent
+BEFORE DELETE ON persons_borrowed_books
+EXECUTE FUNCTION check_absence();

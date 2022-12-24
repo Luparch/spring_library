@@ -2,6 +2,7 @@ package org.Lup.app.facade;
 
 import org.Lup.app.dto.BookDto;
 import org.Lup.app.dto.PersonDto;
+import org.Lup.app.exception.DomainException;
 import org.Lup.app.mapper.BookMapper;
 import org.Lup.app.mapper.PersonMapper;
 import org.Lup.app.service.BookService;
@@ -13,6 +14,7 @@ import org.Lup.app.web.response.PersonResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class Facade {
@@ -33,10 +35,9 @@ public class Facade {
         this.personMapper = personMapper;
     }
 
-    public BookResponse getBookById(Integer bookId) {
-        BookDto dto = bookService.getBookById(bookId);
-        BookResponse response = bookMapper.bookDtoToBookResponse(dto);
-        return response;
+    public Optional<BookResponse> getBookById(Integer bookId) throws DomainException {
+        return bookService.getBookById(bookId)
+                .map(bookMapper::bookDtoToBookResponse);
     }
 
 
@@ -49,21 +50,20 @@ public class Facade {
         bookService.deleteBookById(bookId);
     }
 
-    public void updateBookById(Integer bookId, BookRequest request){
+    public void updateBookById(Integer bookId, BookRequest request) throws DomainException {
         BookDto dto = bookMapper.bookRequestToBookDto(request);
         bookService.updateBookById(bookId, dto);
     }
 
-    public void createBook(BookRequest request){
+    public void createBook(BookRequest request) throws DomainException {
         BookDto dto = bookMapper.bookRequestToBookDto(request);
         bookService.createBook(dto);
 
     }
 
-    public PersonResponse getPersonById(Integer personId){
-        PersonDto dto = personService.getPersonById(personId);
-        PersonResponse response = personMapper.personDtoToPersonResponse(dto);
-        return response;
+    public Optional<PersonResponse> getPersonById(Integer personId) throws DomainException {
+        return personService.getPersonById(personId)
+                .map(personMapper::personDtoToPersonResponse);
     }
 
     public List<PersonResponse> getAllPersons(){
@@ -75,7 +75,7 @@ public class Facade {
         personService.deletePersonById(personId);
     }
 
-    public void createPerson(PersonRequest request){
+    public void createPerson(PersonRequest request) throws DomainException {
         PersonDto dto = personMapper.personRequestToPersonDto(request);
         personService.createPerson(dto);
     }
@@ -85,16 +85,16 @@ public class Facade {
         return list.stream().map(bookMapper::bookDtoToBookResponse).toList();
     }
 
-    public void updatePersonById(Integer personId, PersonRequest request) {
+    public void updatePersonById(Integer personId, PersonRequest request) throws DomainException {
         PersonDto dto = personMapper.personRequestToPersonDto(request);
         personService.updatePersonById(personId, dto);
     }
 
-    public void borrowBook(Integer personId, Integer bookId){
+    public void borrowBook(Integer personId, Integer bookId) throws DomainException {
         personService.borrowBook(personId, bookId);
     }
 
-    public void returnBook(Integer personId, Integer bookId) {
+    public void returnBook(Integer personId, Integer bookId) throws DomainException {
         personService.returnBook(personId, bookId);
     }
 }

@@ -3,10 +3,11 @@ package org.Lup.app.service;
 import org.Lup.app.dto.PersonDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PersonService {
 
-    PersonDto getPersonById(Integer id);
+    Optional<PersonDto> getPersonById(Integer id);
 
     void deletePersonById(Integer id);
 

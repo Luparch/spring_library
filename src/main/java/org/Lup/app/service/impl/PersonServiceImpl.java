@@ -6,6 +6,7 @@ import org.Lup.app.service.PersonService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PersonServiceImpl implements PersonService {
@@ -17,7 +18,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public PersonDto getPersonById(Integer id) {
+    public Optional<PersonDto> getPersonById(Integer id){
         return personDao.get(id);
     }
 
@@ -27,7 +28,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public void createPerson(PersonDto dto) {
+    public void createPerson(PersonDto dto){
         personDao.store(dto);
     }
 
@@ -37,18 +38,19 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public void updatePersonById(Integer personId, PersonDto dto) {
+    public void updatePersonById(Integer personId, PersonDto dto){
         dto.setId(personId);
         personDao.update(dto);
     }
 
     @Override
-    public void borrowBook(Integer personId, Integer bookId) {
+    public void borrowBook(Integer personId, Integer bookId){
         personDao.borrowBook(personId, bookId);
     }
 
     @Override
-    public void returnBook(Integer personId, Integer bookId) {
+    public void returnBook(Integer personId, Integer bookId){
         personDao.returnBook(personId, bookId);
     }
+    
 }
