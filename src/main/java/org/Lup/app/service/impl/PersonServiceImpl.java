@@ -1,6 +1,6 @@
 package org.Lup.app.service.impl;
 
-import org.Lup.app.dao.PersonDao;
+import org.Lup.app.dao.person.PersonDao;
 import org.Lup.app.dto.PersonDto;
 import org.Lup.app.service.PersonService;
 import org.springframework.stereotype.Service;

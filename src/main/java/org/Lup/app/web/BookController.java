@@ -1,8 +1,10 @@
 package org.Lup.app.web;
 
+import org.Lup.app.dto.AuthorDto;
 import org.Lup.app.exception.DomainException;
 import org.Lup.app.facade.Facade;
 import org.Lup.app.web.constant.WebConstant;
+import org.Lup.app.web.request.AuthorRequest;
 import org.Lup.app.web.request.BookRequest;
 import org.Lup.app.web.response.BookResponse;
 import org.springframework.http.MediaType;
@@ -32,9 +34,15 @@ public class BookController {
         return list;
     }
 
-    @GetMapping(value = "/get", params = "author")
-    public List<BookResponse> getBooksByAuthor(@RequestParam("author") String authorName){
-        List<BookResponse> list = facade.getBooksByAuthor(authorName);
+    @GetMapping(value = "/get", params = "{name, secondName, patronymic}")
+    public List<BookResponse> getBooksByAuthor(@RequestParam("name") String name,
+                                               @RequestParam("secondName") String secondName,
+                                               @RequestParam("patronymic") String patronymic){
+        AuthorRequest request = new AuthorRequest();
+        request.setName(name);
+        request.setSecondName(secondName);
+        request.setPatronymic(patronymic);
+        List<BookResponse> list = facade.getBooksByAuthor(request);
         return list;
     }
 
@@ -44,12 +52,12 @@ public class BookController {
     }
 
     @PutMapping("/update/{bookId}")
-    public void updateBook(@PathVariable Integer bookId, @RequestBody BookRequest request) throws DomainException {
+    public void updateBook(@PathVariable Integer bookId, @RequestBody BookRequest request) {
         facade.updateBookById(bookId, request);
     }
 
     @PostMapping("/create")
-    public void createBook(@RequestBody BookRequest request) throws DomainException {
+    public void createBook(@RequestBody BookRequest request) {
         facade.createBook(request);
     }
 

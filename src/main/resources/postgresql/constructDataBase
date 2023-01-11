@@ -1,8 +1,101 @@
+CREATE EXTENSION citext;
+
 CREATE TABLE books(
-    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    title citext NOT NULL,
-    author citext NOT NULL
+    book_id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    title citext NOT NULL
 );
+
+CREATE TABLE authors(
+    author_id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name citext NOT NULL,
+    second_name citext NOT NULL DEFAULT '',
+    patronymic citext NOT NULL DEFAULT '',
+    UNIQUE (name, second_name, patronymic)
+);
+
+CREATE TYPE author AS(
+        name citext,
+        second_name citext,
+        patronymic citext
+);
+
+CREATE TABLE book_and_authors(
+    book_id integer REFERENCES books ON DELETE CASCADE ON UPDATE CASCADE,
+    author_id integer REFERENCES authors ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (book_id, author_id)
+);
+
+CREATE VIEW all_books_with_authors(book_id, title, authors_of_book)
+AS
+    SELECT books.book_id, books.title, array_agg((authors.name, authors.second_name, authors.patronymic)::author)
+    FROM (books NATURAL JOIN book_and_authors NATURAL JOIN authors) GROUP BY books.book_id, books.title;
+
+CREATE PROCEDURE insert_book_with_authors(_title text, _authors_of_book author[])
+AS  $$
+    <<local>>
+    BEGIN
+        IF NOT EXISTS (SELECT * FROM all_books_with_authors AS t
+                      WHERE t.title = _title AND
+                      (_authors_of_book <@ t.authors_of_book AND _authors_of_book @> t.authors_of_book))
+        THEN
+                INSERT INTO authors (name, second_name, patronymic) (SELECT * FROM unnest(_authors_of_book))
+                ON CONFLICT (name, second_name, patronymic) DO NOTHING;
+                WITH books_inserted AS
+                (
+                    INSERT INTO books (title) VALUES (_title) RETURNING books.book_id
+                ),
+                authors_inserted AS
+                (
+                    SELECT authors.author_id FROM authors NATURAL JOIN unnest(_authors_of_book)
+                )
+                INSERT INTO book_and_authors(book_id, author_id) (SELECT books_inserted.book_id, authors_inserted.author_id
+                FROM books_inserted CROSS JOIN authors_inserted);
+        END IF;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE PROCEDURE update_book_with_authors(_book_id integer, _title text, _authors_of_book author[])
+AS  $$
+    <<local>>
+    BEGIN
+        INSERT INTO authors (name, second_name, patronymic) (SELECT * FROM unnest(_authors_of_book))
+        ON CONFLICT (name, second_name, patronymic) DO NOTHING;
+        UPDATE books SET title = _title WHERE _book_id = book_id;
+        DELETE FROM book_and_authors AS t WHERE t.book_id = _book_id;
+        WITH authors_inserted AS
+        (
+            SELECT authors.author_id FROM authors NATURAL JOIN unnest(_authors_of_book)
+        )
+        INSERT INTO book_and_authors(book_id, author_id) (SELECT t.book_id, authors_inserted.author_id
+        FROM unnest(ARRAY[_book_id]) as t(book_id) CROSS JOIN authors_inserted);
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION select_all_books()
+RETURNS TABLE(book_id integer, title citext, authors_of_book author[])
+AS $$
+    SELECT t.book_id, t.title, t.authors_of_book FROM all_books_with_authors AS t;
+$$ LANGUAGE sql;
+
+/*
+Возвращаемым типом является таблица, но на самом деле вернуться может лишь 1 кортеж.
+Это сделано специально, т.к. если нет книги с таким book_id, функция с OUT параметрами
+вернет кортеж с null в каждом атребуте и, следовательно, ResultSet.next() вернет true,
+а функция с табличным типом возврата вернет 0 строк. Это не только удобнее для клиентского кода,
+но и логичнее.
+*/
+CREATE FUNCTION select_book_by_id(IN book_id integer)
+RETURNS TABLE(book_id integer, title citext, authors_of_book author[])
+AS $$
+    SELECT t.book_id, t.title, t.authors_of_book FROM all_books_with_authors AS t WHERE t.book_id = book_id;
+$$ LANGUAGE sql;
+
+CREATE FUNCTION select_books_by_author(author_of_book author)
+RETURNS TABLE(book_id integer, title citext, authors_of_book author[])
+AS $$
+    SELECT t.book_id, t.title, t.authors_of_book FROM all_books_with_authors AS t
+    WHERE ARRAY[author_of_book] <@ t.authors_of_book;
+$$ LANGUAGE sql;
 
 CREATE TABLE persons(
     id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -18,14 +111,12 @@ CREATE TABLE persons_borrowed_books(
     PRIMARY KEY (person_id, book_id)
 );
 
-CREATE FUNCTION check_absence() RETURNS trigger
+CREATE PROCEDURE delete_record(_person_id integer, _book_id integer)
 AS $$
     BEGIN
-        IF OLD IS NULL THEN RAISE triggered_action_exception;
+        IF NOT EXISTS(SELECT * FROM persons_borrowed_books WHERE book_id = _book_id AND person_id = _person_id) THEN
+            RAISE triggered_action_exception;
         END IF;
+        DELETE FROM persons_borrowed_books WHERE person_id = _person_id AND book_id = _book_id;
     END;
-$$ STABLE LANGUAGE plpgsql;
-
-CREATE TRIGGER cannot_return_if_absent
-BEFORE DELETE ON persons_borrowed_books
-EXECUTE FUNCTION check_absence();
+$$ LANGUAGE plpgsql;

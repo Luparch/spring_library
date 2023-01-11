@@ -1,5 +1,6 @@
 package org.Lup.app.facade;
 
+import org.Lup.app.dto.AuthorDto;
 import org.Lup.app.dto.BookDto;
 import org.Lup.app.dto.PersonDto;
 import org.Lup.app.exception.DomainException;
@@ -7,6 +8,7 @@ import org.Lup.app.mapper.BookMapper;
 import org.Lup.app.mapper.PersonMapper;
 import org.Lup.app.service.BookService;
 import org.Lup.app.service.PersonService;
+import org.Lup.app.web.request.AuthorRequest;
 import org.Lup.app.web.request.BookRequest;
 import org.Lup.app.web.request.PersonRequest;
 import org.Lup.app.web.response.BookResponse;
@@ -80,9 +82,12 @@ public class Facade {
         personService.createPerson(dto);
     }
 
-    public List<BookResponse> getBooksByAuthor(String name){
-        List<BookDto> list = bookService.getBooksByAuthor(name);
-        return list.stream().map(bookMapper::bookDtoToBookResponse).toList();
+    public List<BookResponse> getBooksByAuthor(AuthorRequest request){
+        AuthorDto dto = bookMapper.authorRequestToAuthorDto(request);
+        List<BookDto> list = bookService.getBooksByAuthor(dto);
+        return list.stream()
+                .map(bookMapper::bookDtoToBookResponse)
+                .toList();
     }
 
     public void updatePersonById(Integer personId, PersonRequest request) throws DomainException {

@@ -1,6 +1,7 @@
 package org.Lup.app.service.impl;
 
-import org.Lup.app.dao.BookDao;
+import org.Lup.app.dao.book.BookDao;
+import org.Lup.app.dto.AuthorDto;
 import org.Lup.app.dto.BookDto;
 import org.Lup.app.exception.DomainException;
 import org.Lup.app.service.BookService;
@@ -46,8 +47,8 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> getBooksByAuthor(String name) {
-        return bookDao.getByAuthor(name);
+    public List<BookDto> getBooksByAuthor(AuthorDto dto) {
+        return bookDao.getByAuthor(dto);
     }
 
 }

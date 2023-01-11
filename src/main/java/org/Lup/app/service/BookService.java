@@ -1,5 +1,6 @@
 package org.Lup.app.service;
 
+import org.Lup.app.dto.AuthorDto;
 import org.Lup.app.dto.BookDto;
 
 import java.util.List;
@@ -10,12 +11,12 @@ public interface BookService {
 
     void deleteBookById(Integer id);
 
-    void updateBookById(Integer id, BookDto book);
+    void updateBookById(Integer id, BookDto dto);
 
     void createBook(BookDto dto);
 
     List<BookDto> getAllBooks();
 
-    List<BookDto> getBooksByAuthor(String name);
+    List<BookDto> getBooksByAuthor(AuthorDto dto);
 
 }
