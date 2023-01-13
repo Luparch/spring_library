@@ -13,21 +13,20 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PersonDaoTest {
 
-    private final String host = "localhost";
-    private final int port = 5432;
-    private final String db = "library_test";
-    private final String user = "postgres";
-    private final String password = "Ytp1288";
-    private PGDataSource ds;
-    private PersonDao dao;
+    private static final String host = "localhost";
+    private static final int port = 5432;
+    private static final String db = "library_test";
+    private static final String user = "postgres";
+    private static final String password = "Ytp1288";
+    private static PGDataSource ds;
+    private static PersonDao dao;
 
-    private PersonDto person1;
+    private static PersonDto person;
 
     @BeforeAll
-    void init(){
+    static void init(){
         ds = new PGDataSource();
         ds.setServerName(host);
         ds.setPort(port);
@@ -35,17 +34,9 @@ public class PersonDaoTest {
         ds.setUser(user);
         ds.setPassword(password);
         dao = new PersonDao(new RawPersonDao(ds));
-
-        person1 = new PersonDto();
-        person1.setName("n1");
-        person1.setSecondName("f1");
-        person1.setPatronymic("p1");
-        Calendar cal = new GregorianCalendar(2003, Calendar.JANUARY, 20);
-        person1.setBirthDay(cal.getTime().getTime());
     }
 
     @BeforeEach
-    @AfterAll
     void truncateTables() throws SQLException {
         Connection conn = ds.getConnection();
         Statement st = conn.createStatement();
@@ -54,60 +45,19 @@ public class PersonDaoTest {
         conn.close();
     }
 
-    @Test
-    void storedPersonIsPresent(){
-        dao.store(person1);
-
-        List<PersonDto> list = dao.getAll();
-        assertEquals(Set.of(person1), setPersonIdToNull(list));
-    }
-
-    @Test
-    void deletedPersonIsAbsent(){
-        dao.store(person1);
-
-        Integer id = dao.getAll().get(0).getId();
-        dao.delete(id);
-
-        List<PersonDto> list = dao.getAll();
-        assertEquals(Set.of(), setPersonIdToNull(list));
-    }
-
-    @Test
-    void updatedPersonIsReplaced(){
-        dao.store(person1);
-        Integer id = dao.getAll().get(0).getId();
-        PersonDto person = new PersonDto();
-        person.setName(person1.getName() + " updated");
-        person.setSecondName(person1.getSecondName());
-        person.setPatronymic(person1.getPatronymic());
-        person.setBirthDay(person1.getBirthDay());
-        person.setId(id);
-
-        dao.update(person);
-
-        List<PersonDto> list = dao.getAll();
-        assertEquals(Set.of(person), new HashSet<>(list));
-    }
-
-    @Test
-    void getPersonById(){
-        dao.store(person1);
-
-        Integer id = dao.getAll().get(0).getId();
-        PersonDto person = dao.get(id).get();
-
-        person.setId(null);
-        assertEquals(person1, person);
+    @BeforeEach
+    void setTestObjects(){
+        person = new PersonDto();
+        person.setName("n1");
+        person.setSecondName("f1");
+        person.setPatronymic("p1");
+        Calendar cal = new GregorianCalendar(2003, Calendar.JANUARY, 20);
+        person.setBirthDay(cal.getTime().getTime());
     }
 
     @Test
     void updatingOfAbsentPersonHasNoEffect(){
-        PersonDto person = new PersonDto();
-        person.setName(person1.getName() + " updated");
-        person.setSecondName(person1.getSecondName());
-        person.setPatronymic(person1.getPatronymic());
-        person.setBirthDay(person1.getBirthDay());
+        person.setName("updated");
         person.setId(1);
 
         dao.update(person);
@@ -118,65 +68,94 @@ public class PersonDaoTest {
 
     @Test
     void nullNameForbidden(){
-        person1.setName(null);
-
-        assertThrows(DomainException.class, () -> dao.store(person1));
-
-        person1.setName("n1");
-    }
-
-    @Test
-    void nullSecondNameForbidden(){
-        person1.setSecondName(null);
-
-        assertThrows(DomainException.class, () -> dao.store(person1));
-
-        person1.setSecondName("f1");
-    }
-
-    @Test
-    void nullPatronymicForbidden(){
-        person1.setPatronymic(null);
-
-        assertThrows(DomainException.class, () -> dao.store(person1));
-
-        person1.setPatronymic("p1");
-    }
-
-    @Test
-    void nullBirthDateForbidden(){
-        PersonDto person = new PersonDto();
-        person.setName(person1.getName());
-        person.setSecondName(person1.getSecondName());
-        person.setPatronymic(person1.getPatronymic());
-        person.setBirthDay(null);
+        person.setName(null);
 
         assertThrows(DomainException.class, () -> dao.store(person));
     }
 
     @Test
-    void personCantBorrowAbsentBook(){
-        dao.store(person1);
+    void nullSecondNameForbidden(){
+        person.setSecondName(null);
 
-        Integer person_id = dao.getAll().get(0).getId();
-        assertThrows(DomainException.class, () -> dao.borrowBook(person_id,1));
+        assertThrows(DomainException.class, () -> dao.store(person));
+    }
+
+    @Test
+    void nullPatronymicForbidden(){
+        person.setPatronymic(null);
+
+        assertThrows(DomainException.class, () -> dao.store(person));
+    }
+
+    @Test
+    void nullBirthDateForbidden(){
+        person.setBirthDay(null);
+
+        assertThrows(DomainException.class, () -> dao.store(person));
     }
 
     @Nested
-    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    class BookPresent{
-        private AuthorDto author1;
+    class OnePersonAdded{
+        @BeforeEach
+        void addPerson(){
+            dao.store(person);
+        }
+        @Test
+        void storedPersonIsPresent(){
+            List<PersonDto> list = dao.getAll();
+            assertEquals(Set.of(person), setPersonIdToNull(list));
+        }
+
+        @Test
+        void deletedPersonIsAbsent(){
+            Integer id = dao.getAll().get(0).getId();
+            dao.delete(id);
+
+            List<PersonDto> list = dao.getAll();
+            assertEquals(Set.of(), setPersonIdToNull(list));
+        }
+
+        @Test
+        void updatedPersonIsReplaced(){
+            Integer id = dao.getAll().get(0).getId();
+            person.setName("updated");
+            person.setId(id);
+            dao.update(person);
+
+            List<PersonDto> list = dao.getAll();
+            assertEquals(Set.of(person), new HashSet<>(list));
+        }
+
+        @Test
+        void getPersonById(){
+            Integer id = dao.getAll().get(0).getId();
+            PersonDto retrievedPerson = dao.get(id).get();
+
+            retrievedPerson.setId(null);
+            assertEquals(person, retrievedPerson);
+        }
+
+        @Test
+        void personCantBorrowAbsentBook(){
+            Integer person_id = dao.getAll().get(0).getId();
+            assertThrows(DomainException.class, () -> dao.borrowBook(person_id,1));
+        }
+    }
+
+    @Nested
+    class OneBookAdded{
+        private AuthorDto author;
         private BookDto book1;
 
         @BeforeEach
         void addBook() throws SQLException {
-            author1 = new AuthorDto();
-            author1.setName("n1");
-            author1.setSecondName("f1");
-            author1.setPatronymic("p1");
+            author = new AuthorDto();
+            author.setName("n1");
+            author.setSecondName("f1");
+            author.setPatronymic("p1");
 
             book1 = new BookDto();
-            book1.setAuthors(new AuthorDto[] {author1});
+            book1.setAuthors(new AuthorDto[] {author});
             book1.setTitle("The 1");
 
             Connection conn = ds.getConnection();
@@ -207,7 +186,7 @@ public class PersonDaoTest {
 
         @Test
         void personReturnBorrowedBook(){
-            dao.store(person1);
+            dao.store(person);
             Integer personId = dao.getAll().get(0).getId();
             dao.borrowBook(personId, book1.getId());
 
@@ -218,7 +197,7 @@ public class PersonDaoTest {
 
         @Test
         void borrowingTwiceForbidden(){
-            dao.store(person1);
+            dao.store(person);
             Integer personId = dao.getAll().get(0).getId();
 
             dao.borrowBook(personId, book1.getId());
@@ -227,8 +206,8 @@ public class PersonDaoTest {
         }
 
         @Test
-        void returningNotBorrowedBookForbidden() throws SQLException {
-            dao.store(person1);
+        void returningNotBorrowedBookForbidden(){
+            dao.store(person);
             Integer personId = dao.getAll().get(0).getId();
 
             assertThrows(DomainException.class, () -> dao.returnBook(personId, book1.getId()));
