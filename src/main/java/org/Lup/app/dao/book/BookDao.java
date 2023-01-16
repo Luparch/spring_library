@@ -23,12 +23,12 @@ public class BookDao {
         try{
             if(dto.getAuthors()==null)
                 throw new DomainException("Список авторов не должен быть null");
-            boolean hasNullAuthor = Arrays.stream(dto.getAuthors()).anyMatch(authorDto -> authorDto==null);
-            if(hasNullAuthor)
-                throw new DomainException("Автор не должен быть null");
             if(dto.getAuthors().length==0)
                 throw new DomainException("У книги должен быть автор. Если автор неизвестен, его имя, фамилия " +
                         "и отчество должны быть пустыми строками");
+            boolean hasNullAuthor = Arrays.stream(dto.getAuthors()).anyMatch(authorDto -> authorDto==null);
+            if(hasNullAuthor)
+                throw new DomainException("Автор не должен быть null");
             dao.store(dto);
         }catch(SQLException e){
             if("23502".equals(e.getSQLState())){

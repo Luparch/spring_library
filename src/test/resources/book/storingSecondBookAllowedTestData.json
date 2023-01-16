@@ -1,0 +1,29 @@
+[
+  {
+    "title":"The 1",
+    "authors":[
+      {"name":"n1","secondName":"f1","patronymic":"p1"}
+    ]
+  },
+  {
+    "title":"The 1",
+    "authors":[
+      {"name":"n1","secondName":"f1","patronymic":"p1"},
+      {"name":"n2","secondName":"f2","patronymic":"p2"},
+      {"name":"n3","secondName":"f3","patronymic":"p3"}
+    ]
+  },
+  {
+    "title":"The 1",
+    "authors":[
+      {"name":"n1","secondName":"f1","patronymic":"p1"},
+      {"name":"n3","secondName":"f3","patronymic":"p3"}
+    ]
+  },
+  {
+    "title":"The 1",
+    "authors":[
+      {"name":"n3","secondName":"f3","patronymic":"p3"}
+    ]
+  }
+]

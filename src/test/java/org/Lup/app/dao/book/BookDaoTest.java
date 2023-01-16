@@ -6,6 +6,7 @@ import org.Lup.app.dto.AuthorDto;
 import org.Lup.app.dto.BookDto;
 import org.Lup.app.exception.DomainException;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
 
 import java.sql.*;
 import java.util.*;
@@ -13,7 +14,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayNameGeneration(DisplayNameGenerator.Simple.class)
 public class BookDaoTest {
 
     private static final String host = "localhost";
@@ -30,7 +30,7 @@ public class BookDaoTest {
     private BookDto book, copyOfBook;
 
     @BeforeAll
-    static void init() throws SQLException {
+    static void init(){
         ds = new PGDataSource();
         ds.setServerName(host);
         ds.setPort(port);
@@ -65,6 +65,7 @@ public class BookDaoTest {
         copyOfBook.setTitle(book.getTitle());
         copyOfBook.setAuthors(book.getAuthors().clone());
     }
+
     @BeforeEach
     void truncateTables() throws SQLException {
         Connection conn = ds.getConnection();
@@ -81,57 +82,23 @@ public class BookDaoTest {
         assertThrows(DomainException.class, () -> dao.update(book));
     }
 
-    @Test
-    void nullTitleForbidden(){
-        book.setTitle(null);
-
-        assertThrows(DomainException.class, () -> dao.store(book));
+    @ParameterizedTest(name = "[{index}] {0}")
+    @ArgumentsSourceJsonPath("src\\test\\resources\\book\\bookForbiddenTestData.json")
+    void storingThisForbidden(BookDto dto){
+        System.out.println(dto.toString());
+        assertThrows(DomainException.class, () -> dao.store(dto));
     }
 
-    @Test
-    void nullAuthorForbidden(){
-        book.setAuthors(new AuthorDto[] {null});
-
-        assertThrows(DomainException.class, () -> dao.store(book));
-    }
-
-    @Test
-    void nullFieldInAuthorForbidden(){
-        author1.setName(null);
-        book.setAuthors(new AuthorDto[] {author1});
-
-        assertThrows(DomainException.class, () -> dao.store(book));
-    }
-
-    @Test
-    void nullAuthorsArrayForbidden(){
-        book.setAuthors(null);
-
-        assertThrows(DomainException.class, () -> dao.store(book));
-    }
-
-    @Test
-    void emptyAuthorsArrayForbidden(){
-        book.setAuthors(new AuthorDto[] {});
-
-        assertThrows(DomainException.class, () -> dao.store(book));
-    }
-
-    @Test
-    void authorCanBeUnknownWithEmptyStringFields(){
-        author1.setName("");
-        author1.setSecondName("");
-        author1.setPatronymic("");
-        book.setAuthors(new AuthorDto[] {author1});
-
-        dao.store(book);
+    @ParameterizedTest(name = "[{index}] {0}")
+    @ArgumentsSourceJsonPath("src\\test\\resources\\book\\bookAllowedTestData.json")
+    void storingThisAllowed(BookDto dto){
+        dao.store(dto);
 
         List<BookDto> list = dao.getAll();
-        assertEquals(Set.of(book), setBookIdToNull(list));
+        assertEquals(Set.of(dto), setBookIdToNull(list));
     }
 
     @Nested
-    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class OneBookAdded{
         @BeforeEach
         void addBook(){
@@ -141,6 +108,15 @@ public class BookDaoTest {
         void storedBookIsPresent(){
             List<BookDto> list = dao.getAll();
             assertEquals(Set.of(book), setBookIdToNull(list));
+        }
+
+        @Test
+        void getBookById(){
+            Integer id = dao.getAll().get(0).getId();
+            BookDto retrievedBook = dao.get(id).get();
+            retrievedBook.setId(null);
+
+            assertEquals(book, retrievedBook);
         }
 
         @Test
@@ -164,55 +140,23 @@ public class BookDaoTest {
             assertEquals(Set.of(book), new HashSet<>(list));
         }
 
-        @Test
-        void getBookById(){
-            Integer id = dao.getAll().get(0).getId();
-            BookDto retrievedBook = dao.get(id).get();
-            retrievedBook.setId(null);
+        @ParameterizedTest(name = "[{index}] {0}")
+        @ArgumentsSourceJsonPath("src\\test\\resources\\book\\storingSecondBookAllowedTestData.json")
+        void storingThisSecondBookAllowed(BookDto dto){
+            dao.store(dto);
 
-            assertEquals(book, retrievedBook);
+            List<BookDto> list = dao.getAll();
+            assertEquals(Set.of(book, dto), setBookIdToNull(list));
         }
 
-
         @Test
-        void sameTitleSameSetAuthors(){
-            dao.store(copyOfBook);
+        void storingTwiceHasNoEffect(){
+            dao.store(book);
 
             List<BookDto> list = dao.getAll();
             assertEquals(Set.of(book), setBookIdToNull(list));
         }
 
-        @Test
-        void sameTitleSubSetAuthors(){
-            copyOfBook.setAuthors(new AuthorDto[] {author1});
-            dao.store(copyOfBook);
-
-            assertEquals(Set.of(book, copyOfBook), setBookIdToNull(dao.getAll()));
-        }
-
-        @Test
-        void sameTitleSuperSetAuthors(){
-            copyOfBook.setAuthors(new AuthorDto[] {author1, author2, author3});
-            dao.store(copyOfBook);
-
-            assertEquals(Set.of(book, copyOfBook), setBookIdToNull(dao.getAll()));
-        }
-
-        @Test
-        void sameTitleCrossingSetAuthors(){
-            copyOfBook.setAuthors(new AuthorDto[] {author1, author3});
-            dao.store(copyOfBook);
-
-            assertEquals(Set.of(book, copyOfBook), setBookIdToNull(dao.getAll()));
-        }
-
-        @Test
-        void sameTitleNotCrossingSetAuthors(){
-            copyOfBook.setAuthors(new AuthorDto[] {author3});
-            dao.store(copyOfBook);
-
-            assertEquals(Set.of(book, copyOfBook), setBookIdToNull(dao.getAll()));
-        }
     }
 
     private Set<BookDto> setBookIdToNull(List<BookDto> list){

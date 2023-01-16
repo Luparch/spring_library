@@ -1,0 +1,9 @@
+[
+  {"title":null, "authors":[{"name":"n2","secondName":"f2","patronymic":"p2"}]},
+  {"title":"The 1", "authors":[{"name":null,"secondName":"f2","patronymic":"p2"}]},
+  {"title":"The 1", "authors":[{"name":"n2","secondName":null,"patronymic":"p2"}]},
+  {"title":"The 1", "authors":[{"name":"n2","secondName":"f2","patronymic":null}]},
+  {"title":"The 1", "authors":[null]},
+  {"title":"The 1", "authors":[]},
+  {"title":"The 1", "authors":null}
+]

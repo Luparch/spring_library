@@ -14,18 +14,6 @@ public class AuthorDto implements SQLData {
     private String secondName;
     private String patronymic;
 
-    public AuthorDto(){
-        name = secondName = patronymic = "";
-    }
-
-    public void setSecondName(String par){
-        secondName = (par == null ? "" : par);
-    }
-
-    public void setPatronymic(String par){
-        patronymic = (par == null ? "" : par);
-    }
-
     @Override
     public String getSQLTypeName() throws SQLException {
         return "author";

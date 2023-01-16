@@ -6,6 +6,7 @@ import org.Lup.app.dto.BookDto;
 import org.Lup.app.dto.PersonDto;
 import org.Lup.app.exception.DomainException;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
 
 import java.sql.*;
 import java.util.*;
@@ -60,6 +61,7 @@ public class PersonDaoTest {
         person.setName("updated");
         person.setId(1);
 
+
         dao.update(person);
 
         List<PersonDto> list = dao.getAll();
@@ -67,32 +69,21 @@ public class PersonDaoTest {
     }
 
     @Test
-    void nullNameForbidden(){
-        person.setName(null);
+    void personCanHaveEmptyPatronymic(){
+        person.setPatronymic("");
 
-        assertThrows(DomainException.class, () -> dao.store(person));
+        dao.store(person);
+
+        List<PersonDto> list = dao.getAll();
+        assertEquals(Set.of(person), setPersonIdToNull(list));
     }
 
-    @Test
-    void nullSecondNameForbidden(){
-        person.setSecondName(null);
-
-        assertThrows(DomainException.class, () -> dao.store(person));
+    @ParameterizedTest(name = "[{index}] {0}")
+    @ArgumentsSourceJsonPath("src\\test\\resources\\person\\personForbiddenTestData.json")
+    void storingThisForbidden(PersonDto dto){
+        assertThrows(DomainException.class, () -> dao.store(dto));
     }
 
-    @Test
-    void nullPatronymicForbidden(){
-        person.setPatronymic(null);
-
-        assertThrows(DomainException.class, () -> dao.store(person));
-    }
-
-    @Test
-    void nullBirthDateForbidden(){
-        person.setBirthDay(null);
-
-        assertThrows(DomainException.class, () -> dao.store(person));
-    }
 
     @Nested
     class OnePersonAdded{
@@ -104,6 +95,15 @@ public class PersonDaoTest {
         void storedPersonIsPresent(){
             List<PersonDto> list = dao.getAll();
             assertEquals(Set.of(person), setPersonIdToNull(list));
+        }
+
+        @Test
+        void getPersonById(){
+            Integer id = dao.getAll().get(0).getId();
+            PersonDto retrievedPerson = dao.get(id).get();
+
+            retrievedPerson.setId(null);
+            assertEquals(person, retrievedPerson);
         }
 
         @Test
@@ -124,15 +124,6 @@ public class PersonDaoTest {
 
             List<PersonDto> list = dao.getAll();
             assertEquals(Set.of(person), new HashSet<>(list));
-        }
-
-        @Test
-        void getPersonById(){
-            Integer id = dao.getAll().get(0).getId();
-            PersonDto retrievedPerson = dao.get(id).get();
-
-            retrievedPerson.setId(null);
-            assertEquals(person, retrievedPerson);
         }
 
         @Test
