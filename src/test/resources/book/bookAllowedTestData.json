@@ -1,6 +1,12 @@
 [
-  {"title":"The 1", "authors":[{"name":"n2","secondName":"f2","patronymic":"p2"}]},
-  {"title":"The 1", "authors":[{"name":"n2","secondName":"f2","patronymic":""}]},
-  {"title":"The 1", "authors":[{"name":"n2","secondName":"","patronymic":""}]},
-  {"title":"The 1", "authors":[{"name":"","secondName":"","patronymic":""}]}
+  {"title":"The 1", "authors":[{"name":"n1","secondName":"f1","patronymic":"p1"}]},
+  {"title":"The 1", "authors":[{"name":"n1","secondName":"f1","patronymic":""}]},
+  {"title":"The 1", "authors":[{"name":"n1","secondName":"","patronymic":""}]},
+  {"title":"The 1", "authors":[{"name":"","secondName":"","patronymic":""}]},
+  {"title":"The 1", "authors":[{"name":"n1","secondName":"f1","patronymic":null}]},
+  {"title":"The 1", "authors":[{"name":"n1","secondName":null,"patronymic":null}]},
+  {"title":"The 1", "authors":[{"name":null,"secondName":null,"patronymic":null}]},
+  {"title":"The 1", "authors":[null]},
+  {"title":"The 1", "authors":[]},
+  {"title":"The 1", "authors":null}
 ]

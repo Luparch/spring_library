@@ -12,7 +12,7 @@ import java.util.*;
 class RawBookDao{
 
     DataSource ds;
-    private Map<String, Class<?>> map;
+    private final Map<String, Class<?>> map;
     public RawBookDao(DataSource ds){
         this.ds = ds;
         map = new HashMap<>();
@@ -25,6 +25,7 @@ class RawBookDao{
         pst.setArray(2, conn.createArrayOf("author", dto.getAuthors()));
         pst.executeUpdate();
         pst.close();
+        conn.close();
     }
     public Optional<BookDto> get(Integer id) throws SQLException{
         Connection conn = ds.getConnection();
@@ -38,6 +39,8 @@ class RawBookDao{
             dto.setTitle(rs.getString("title"));
             dto.setAuthors((AuthorDto[]) rs.getArray("authors_of_book").getArray(map));
         }
+        pst.close();
+        conn.close();
         return Optional.ofNullable(dto);
     }
     public List<BookDto> getAll() throws SQLException{
@@ -53,6 +56,7 @@ class RawBookDao{
             list.add(dto);
         }
         pst.close();
+        conn.close();
         return list;
     }
     public void delete(Integer id) throws SQLException{
@@ -61,6 +65,7 @@ class RawBookDao{
         pst.setInt(1, id);
         pst.executeUpdate();
         pst.close();
+        conn.close();
     }
     public void update(BookDto dto) throws SQLException{
         Connection conn = ds.getConnection();
@@ -70,6 +75,8 @@ class RawBookDao{
         pst.setString(2, dto.getTitle());
         pst.setArray(3, conn.createArrayOf("author", dto.getAuthors()));
         pst.executeUpdate();
+        pst.close();
+        conn.close();
     }
 
     public List<BookDto> getByAuthor(AuthorDto author) throws SQLException{
@@ -88,6 +95,9 @@ class RawBookDao{
             dto.setTitle(rs.getString("title"));
             list.add(dto);
         }
+        conn.close();
+        pst.close();
+
         return list;
     }
 

@@ -98,6 +98,16 @@ public class BookDaoTest {
         assertEquals(Set.of(dto), setBookIdToNull(list));
     }
 
+    @Test
+    void authorsArrayIsLikeSetOfAuthors(){
+        book.setAuthors(new AuthorDto[]{author1,author1});
+        dao.store(book);
+
+        book.setAuthors(new AuthorDto[]{author1});
+        List<BookDto> list = dao.getAll();
+        assertEquals(Set.of(book), setBookIdToNull(list));
+    }
+
     @Nested
     class OneBookAdded{
         @BeforeEach

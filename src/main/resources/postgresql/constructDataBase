@@ -46,9 +46,10 @@ AS  $$
                 ),
                 authors_inserted AS
                 (
-                    SELECT authors.author_id FROM authors NATURAL JOIN unnest(_authors_of_book)
+                    SELECT DISTINCT authors.author_id FROM authors NATURAL JOIN unnest(_authors_of_book)
                 )
-                INSERT INTO book_and_authors(book_id, author_id) (SELECT books_inserted.book_id, authors_inserted.author_id
+                INSERT INTO book_and_authors(book_id, author_id)
+                (SELECT books_inserted.book_id, authors_inserted.author_id
                 FROM books_inserted CROSS JOIN authors_inserted);
         END IF;
     END;
@@ -64,7 +65,7 @@ AS  $$
         DELETE FROM book_and_authors AS t WHERE t.book_id = _book_id;
         WITH authors_inserted AS
         (
-            SELECT authors.author_id FROM authors NATURAL JOIN unnest(_authors_of_book)
+            SELECT DISTINCT authors.author_id FROM authors NATURAL JOIN unnest(_authors_of_book)
         )
         INSERT INTO book_and_authors(book_id, author_id) (SELECT t.book_id, authors_inserted.author_id
         FROM unnest(ARRAY[_book_id]) as t(book_id) CROSS JOIN authors_inserted);

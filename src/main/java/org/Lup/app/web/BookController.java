@@ -8,6 +8,7 @@ import org.Lup.app.web.request.AuthorRequest;
 import org.Lup.app.web.request.BookRequest;
 import org.Lup.app.web.response.BookResponse;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,12 +53,12 @@ public class BookController {
     }
 
     @PutMapping("/update/{bookId}")
-    public void updateBook(@PathVariable Integer bookId, @RequestBody BookRequest request) {
+    public void updateBook(@PathVariable Integer bookId, @Validated @RequestBody BookRequest request) {
         facade.updateBookById(bookId, request);
     }
 
     @PostMapping("/create")
-    public void createBook(@RequestBody BookRequest request) {
+    public void createBook(@Validated @RequestBody BookRequest request) {
         facade.createBook(request);
     }
 

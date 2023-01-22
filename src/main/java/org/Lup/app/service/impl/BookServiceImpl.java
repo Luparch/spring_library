@@ -21,7 +21,7 @@ public class BookServiceImpl implements BookService {
 
 
     @Override
-    public Optional<BookDto> getBookById(Integer id) throws DomainException {
+    public Optional<BookDto> getBookById(Integer id) {
         return bookDao.get(id);
     }
 
@@ -31,13 +31,13 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public void updateBookById(Integer id, BookDto dto) throws DomainException {
+    public void updateBookById(Integer id, BookDto dto) {
         dto.setId(id);
         bookDao.update(dto);
     }
 
     @Override
-    public void createBook(BookDto dto) throws DomainException {
+    public void createBook(BookDto dto) {
         bookDao.store(dto);
     }
 

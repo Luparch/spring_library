@@ -6,7 +6,6 @@ import org.Lup.app.exception.DomainException;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,14 +20,7 @@ public class BookDao {
 
     public void store(BookDto dto){
         try{
-            if(dto.getAuthors()==null)
-                throw new DomainException("Список авторов не должен быть null");
-            if(dto.getAuthors().length==0)
-                throw new DomainException("У книги должен быть автор. Если автор неизвестен, его имя, фамилия " +
-                        "и отчество должны быть пустыми строками");
-            boolean hasNullAuthor = Arrays.stream(dto.getAuthors()).anyMatch(authorDto -> authorDto==null);
-            if(hasNullAuthor)
-                throw new DomainException("Автор не должен быть null");
+            correctBook(dto);
             dao.store(dto);
         }catch(SQLException e){
             if("23502".equals(e.getSQLState())){
@@ -66,14 +58,7 @@ public class BookDao {
 
     public void update(BookDto dto){
         try {
-            if(dto.getAuthors()==null)
-                throw new DomainException("Список авторов не должен быть null");
-            boolean hasNullAuthor = Arrays.stream(dto.getAuthors()).anyMatch(authorDto -> authorDto==null);
-            if(hasNullAuthor)
-                throw new DomainException("Автор не должен быть null");
-            if(dto.getAuthors().length==0)
-                throw new DomainException("У книги должен быть автор. Если автор неизвестен, его имя, фамилия " +
-                        "и отчество должны быть пустыми строками");
+            correctBook(dto);
             dao.update(dto);
         } catch (SQLException e) {
             if("23503".equals(e.getSQLState())){
@@ -86,6 +71,7 @@ public class BookDao {
                 throw new RuntimeException(e);
             }
         }
+
     }
 
     public List<BookDto> getByAuthor(AuthorDto dto){
@@ -94,6 +80,28 @@ public class BookDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void correctBook(BookDto dto){
+       AuthorDto[] arr = dto.getAuthors();
+       if(arr == null || arr.length == 0){
+           arr = new AuthorDto[] {new AuthorDto()};
+       }
+       for(int i = 0; i < arr.length; i++){
+           if(arr[i] == null)
+               arr[i] = new AuthorDto();
+           correctAuthor(arr[i]);
+       }
+       dto.setAuthors(arr);
+    }
+
+    private void correctAuthor(AuthorDto dto){
+        if(dto.getName() == null)
+            dto.setName("");
+        if(dto.getSecondName() == null)
+            dto.setSecondName("");
+        if(dto.getPatronymic() == null)
+            dto.setPatronymic("");
     }
 
 }

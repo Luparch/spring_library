@@ -5,6 +5,7 @@ import org.Lup.app.web.constant.WebConstant;
 import org.Lup.app.web.request.PersonRequest;
 import org.Lup.app.web.response.PersonResponse;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,12 +39,12 @@ public class PersonController {
     }
 
     @PutMapping("/update/{personId}")
-    public void updatePerson(@PathVariable Integer personId, @RequestBody PersonRequest request){
+    public void updatePerson(@PathVariable Integer personId, @Validated @RequestBody PersonRequest request){
         facade.updatePersonById(personId, request);
     }
 
     @PostMapping("/create")
-    public void createPerson(@RequestBody PersonRequest request){
+    public void createPerson(@RequestBody @Validated PersonRequest request){
         facade.createPerson(request);
     }
 
