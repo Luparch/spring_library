@@ -1,9 +1,8 @@
 package org.Lup.app.service.impl;
 
-import org.Lup.app.dao.book.BookDao;
+import org.Lup.app.dao.book.BookRepository;
 import org.Lup.app.dto.AuthorDto;
 import org.Lup.app.dto.BookDto;
-import org.Lup.app.exception.DomainException;
 import org.Lup.app.service.BookService;
 import org.springframework.stereotype.Service;
 
@@ -13,42 +12,41 @@ import java.util.Optional;
 @Service
 public class BookServiceImpl implements BookService {
 
-    private final BookDao bookDao;
+    private final BookRepository bookRepository;
 
-    public BookServiceImpl(BookDao bookDao){
-        this.bookDao = bookDao;
+    public BookServiceImpl(BookRepository bookRepository){
+        this.bookRepository = bookRepository;
     }
-
 
     @Override
     public Optional<BookDto> getBookById(Integer id) {
-        return bookDao.get(id);
+        return bookRepository.findById(id);
     }
 
     @Override
     public void deleteBookById(Integer id) {
-        bookDao.delete(id);
+        bookRepository.deleteById(id);
     }
 
     @Override
     public void updateBookById(Integer id, BookDto dto) {
         dto.setId(id);
-        bookDao.update(dto);
+        bookRepository.saveAndFlush(dto);
     }
 
     @Override
     public void createBook(BookDto dto) {
-        bookDao.store(dto);
+        bookRepository.saveAndFlush(dto);
     }
 
     @Override
     public List<BookDto> getAllBooks() {
-        return bookDao.getAll();
+        return bookRepository.findAll();
     }
 
     @Override
     public List<BookDto> getBooksByAuthor(AuthorDto dto) {
-        return bookDao.getByAuthor(dto);
+        return bookRepository.getByAuthor(dto);
     }
 
 }

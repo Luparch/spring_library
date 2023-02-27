@@ -11,6 +11,7 @@ public class BookRequest {
     @NotNull
     private String title;
 
+    @NotNull
     private AuthorDto[] authors;
 
 }

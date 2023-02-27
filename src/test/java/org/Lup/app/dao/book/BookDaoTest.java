@@ -1,110 +1,84 @@
 package org.Lup.app.dao.book;
 
-
-import com.impossibl.postgres.jdbc.PGDataSource;
 import org.Lup.app.dto.AuthorDto;
 import org.Lup.app.dto.BookDto;
-import org.Lup.app.exception.DomainException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DataJpaTest
 public class BookDaoTest {
-
-    private static final String host = "localhost";
-    private static final int port = 5432;
-    private static final String db = "library_test";
-    private static final String user = "postgres";
-    private static final String password = "Ytp1288";
-    private static PGDataSource ds;
-    private static BookDao dao;
-
-
-    private Map<String, Class<?>> map;
+    @Autowired
+    private BookRepository dao;
     private AuthorDto author1, author2, author3;
     private BookDto book, copyOfBook;
 
-    @BeforeAll
-    static void init(){
-        ds = new PGDataSource();
-        ds.setServerName(host);
-        ds.setPort(port);
-        ds.setDatabaseName(db);
-        ds.setUser(user);
-        ds.setPassword(password);
-        dao = new BookDao(new RawBookDao(ds));
-    }
-
     @BeforeEach
     void setTestObjects(){
-        author1 = new AuthorDto();
-        author1.setName("n1");
-        author1.setSecondName("f1");
-        author1.setPatronymic("p1");
+        author1 = AuthorDto.builder()
+                .name("n1")
+                .secondName("f1")
+                .patronymic("p1")
+                .build();
 
-        author2 = new AuthorDto();
-        author2.setName("n2");
-        author2.setSecondName("f2");
-        author2.setPatronymic("p2");
+        author2 = AuthorDto.builder()
+                .name("n2")
+                .secondName("f2")
+                .patronymic("p2")
+                .build();
 
-        author3 = new AuthorDto();
-        author3.setName("n3");
-        author3.setSecondName("f3");
-        author3.setPatronymic("p3");
+        author3 = AuthorDto.builder()
+                .name("n3")
+                .secondName("f3")
+                .patronymic("p3")
+                .build();
 
-        book = new BookDto();
-        book.setTitle("The 1");
-        book.setAuthors(new AuthorDto[] {author1,author2});
+        book = BookDto.builder()
+                .title("The 1")
+                .authors(List.of(author1,author2))
+                .build();
 
-        copyOfBook = new BookDto();
-        copyOfBook.setTitle(book.getTitle());
-        copyOfBook.setAuthors(book.getAuthors().clone());
+        copyOfBook = BookDto.builder()
+                .title(book.getTitle())
+                .authors(List.copyOf(book.getAuthors()))
+                .build();
     }
 
     @BeforeEach
-    void truncateTables() throws SQLException {
-        Connection conn = ds.getConnection();
-        Statement st = conn.createStatement();
-        st.executeUpdate("TRUNCATE books CASCADE");
-        st.close();
-        conn.close();
+    void truncateTables() {
+        dao.deleteAll();
     }
 
     @Test
-    void updatingOfAbsentBookForbidden(){
-        book.setId(1);
+    void findByAuthorTest(){
+        dao.saveAndFlush(book);
 
-        assertThrows(DomainException.class, () -> dao.update(book));
-    }
-
-    @ParameterizedTest(name = "[{index}] {0}")
-    @ArgumentsSourceJsonPath("src\\test\\resources\\book\\bookForbiddenTestData.json")
-    void storingThisForbidden(BookDto dto){
-        System.out.println(dto.toString());
-        assertThrows(DomainException.class, () -> dao.store(dto));
+        List<BookDto> list = dao.getByAuthor(author1);
+        assertEquals(Set.of(book), setBookIdToNull(list));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @ArgumentsSourceJsonPath("src\\test\\resources\\book\\bookAllowedTestData.json")
     void storingThisAllowed(BookDto dto){
-        dao.store(dto);
+        dao.saveAndFlush(dto);
 
-        List<BookDto> list = dao.getAll();
+        List<BookDto> list = dao.findAll();
         assertEquals(Set.of(dto), setBookIdToNull(list));
     }
 
     @Test
-    void authorsArrayIsLikeSetOfAuthors(){
-        book.setAuthors(new AuthorDto[]{author1,author1});
-        dao.store(book);
+    void authorsListIsLikeSetOfAuthors(){
+        book.setAuthors(List.of(author1,author1));
+        dao.saveAndFlush(book);
 
-        book.setAuthors(new AuthorDto[]{author1});
-        List<BookDto> list = dao.getAll();
+        book.setAuthors((List.of(author1)));
+        List<BookDto> list = dao.findAll();
         assertEquals(Set.of(book), setBookIdToNull(list));
     }
 
@@ -112,18 +86,18 @@ public class BookDaoTest {
     class OneBookAdded{
         @BeforeEach
         void addBook(){
-            dao.store(book);
+            dao.saveAndFlush(book);
         }
         @Test
         void storedBookIsPresent(){
-            List<BookDto> list = dao.getAll();
+            List<BookDto> list = dao.findAll();
             assertEquals(Set.of(book), setBookIdToNull(list));
         }
 
         @Test
         void getBookById(){
-            Integer id = dao.getAll().get(0).getId();
-            BookDto retrievedBook = dao.get(id).get();
+            Integer id = dao.findAll().get(0).getId();
+            BookDto retrievedBook = dao.findById(id).get();
             retrievedBook.setId(null);
 
             assertEquals(book, retrievedBook);
@@ -131,40 +105,32 @@ public class BookDaoTest {
 
         @Test
         void deletedBookIsAbsent(){
-            Integer id = dao.getAll().get(0).getId();
-            dao.delete(id);
+            Integer id = dao.findAll().get(0).getId();
+            dao.deleteById(id);
 
-            List<BookDto> list = dao.getAll();
+            List<BookDto> list = dao.findAll();
             assertEquals(Set.of(), setBookIdToNull(list));
         }
 
         @Test
         void updatedBookIsReplaced(){
             book.setTitle("updated");
-            book.setAuthors(new AuthorDto[]{author1, author3});
-            Integer id = dao.getAll().get(0).getId();
+            book.setAuthors(List.of(author1, author3));
+            Integer id = dao.findAll().get(0).getId();
             book.setId(id);
-            dao.update(book);
+            dao.flush();
 
-            List<BookDto> list = dao.getAll();
+            List<BookDto> list = dao.findAll();
             assertEquals(Set.of(book), new HashSet<>(list));
         }
 
         @ParameterizedTest(name = "[{index}] {0}")
         @ArgumentsSourceJsonPath("src\\test\\resources\\book\\storingSecondBookAllowedTestData.json")
         void storingThisSecondBookAllowed(BookDto dto){
-            dao.store(dto);
+            dao.saveAndFlush(dto);
 
-            List<BookDto> list = dao.getAll();
+            List<BookDto> list = dao.findAll();
             assertEquals(Set.of(book, dto), setBookIdToNull(list));
-        }
-
-        @Test
-        void storingTwiceHasNoEffect(){
-            dao.store(book);
-
-            List<BookDto> list = dao.getAll();
-            assertEquals(Set.of(book), setBookIdToNull(list));
         }
 
     }
