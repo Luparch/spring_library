@@ -1,5 +1,6 @@
 package org.Lup.app.web;
 
+import org.Lup.app.dto.BookDto;
 import org.Lup.app.facade.Facade;
 import org.Lup.app.web.constant.WebConstant;
 import org.Lup.app.web.request.PersonRequest;
@@ -29,8 +30,7 @@ public class PersonController {
 
     @GetMapping("/get")
     public List<PersonResponse> getAllPersons(){
-        List<PersonResponse> list = facade.getAllPersons();
-        return list;
+        return facade.getAllPersons();
     }
 
     @DeleteMapping("/delete/{personId}")
@@ -56,6 +56,11 @@ public class PersonController {
     @DeleteMapping("/{personId}/return/{bookId}")
     public void returnBook(@PathVariable Integer personId, @PathVariable Integer bookId){
         facade.returnBook(personId, bookId);
+    }
+
+    @GetMapping("/{personId}/books")
+    public List<BookDto> getBorrowedBooks(@PathVariable Integer personId){
+        return facade.getBorrowedBooks(personId);
     }
 
 }

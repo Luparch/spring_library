@@ -50,18 +50,23 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public void borrowBook(Integer personId, Integer bookId){
-        Optional<PersonDto> person = personRepository.findById(personId);
         Optional<BookDto> book = bookRepository.findById(bookId);
         book.ifPresent((b) -> {
-            person.ifPresent((p) -> p.getBooks().add(b));
+            Optional<PersonDto> person = personRepository.findById(personId);
+            person.ifPresent((p) -> {
+                p.getBooks().add(b);
+                personRepository.saveAndFlush(p);
+            });
         });
     }
 
     @Override
     public void returnBook(Integer personId, Integer bookId){
         Optional<PersonDto> person = personRepository.findById(personId);
-        person.ifPresent((p) -> p.getBooks().removeIf(
-                (b) -> b.getId().equals(bookId))
+        person.ifPresent((p) -> {
+                p.getBooks().removeIf((b) -> b.getId().equals(bookId));
+                personRepository.saveAndFlush(p);
+            }
         );
     }
 
