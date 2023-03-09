@@ -23,22 +23,22 @@ public class PersonController {
         this.facade = facade;
     }
 
-    @GetMapping("/get/{personId}")
+    @GetMapping("/{personId}")
     public Optional<PersonResponse> getPerson(@PathVariable Integer personId){
         return facade.getPersonById(personId);
     }
 
-    @GetMapping("/get")
+    @GetMapping("/all")
     public List<PersonResponse> getAllPersons(){
         return facade.getAllPersons();
     }
 
-    @DeleteMapping("/delete/{personId}")
+    @DeleteMapping("/{personId}")
     public void deletePerson(@PathVariable Integer personId){
         facade.deletePersonById(personId);
     }
 
-    @PutMapping(value = "/update/{personId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{personId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updatePerson(@PathVariable Integer personId, @Validated @RequestBody PersonRequest request){
         facade.updatePersonById(personId, request);
     }

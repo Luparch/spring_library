@@ -3,7 +3,7 @@
   "info": {
     "title": "Учебный проект \"библиотека\"",
     "summary": "Система управления библиотечными записями",
-    "description": "Используется для хранения информации и поддержания непротиворечивого состояния базы данных библиотеки",
+    "description": "Предназначена для хранения информации и поддержания непротиворечивого состояния базы данных библиотеки",
     "contact": {
       "name": "Разработчик",
       "email": "verevkins27@gmail.com"
@@ -68,10 +68,37 @@
         }
       }
     },
-    "/book/get": {
+    "/book/all": {
       "get": {
-        "summary": "Получить все книги, которые, если заданы параметры, написаны автором",
+        "summary": "Получить все книги",
         "operationId": "getAllBooks",
+        "responses": {
+          "200": {
+            "description": "Массив объектов book",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "/components/schemas/book"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/book/byAuthor": {
+      "get": {
+        "summary": "Плучить книги, написанные этим автором",
+        "operationId": "getBooksByAuthor",
         "parameters": [
           {
             "description": "Имя автора",
@@ -124,21 +151,22 @@
         }
       }
     },
-    "/book/get/{bookId}": {
+    "/book/{bookId}": {
+      "summary": "Книга с id равным bookId",
+      "parameters": [
+        {
+          "description": "id книги",
+          "in": "path",
+          "name": "bookId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
       "get": {
         "summary": "Получить книгу с bookId",
         "operationId": "getBook",
-        "parameters": [
-          {
-            "description": "id книги, которую нужно получить",
-            "in": "path",
-            "name": "bookId",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Запрошенный объект book или пусто, если такого объекта нет",
@@ -157,23 +185,10 @@
             "$ref": "/components/responses/defaultResponse"
           }
         }
-      }
-    },
-    "/book/update/{bookId}": {
+      },
       "put": {
         "summary": "Обновить книгу с bookId данными из тела запроса",
         "operationId": "updateBookById",
-        "parameters": [
-          {
-              "description": "id книги, которую надо обновить",
-              "in": "path",
-              "name": "bookId",
-              "required": true,
-              "schema": {
-                "type": "integer"
-              }
-          }
-        ],
         "requestBody": {
           "description": "Данные для обновления объекта. id берется из пути",
           "required": true,
@@ -207,23 +222,10 @@
             "$ref": "/components/responses/defaultResponse"
           }
         }
-      }
-    },
-    "/book/delete/{bookId}": {
+      },
       "delete": {
         "summary": "Удалить книгу с таким id",
         "operationId": "deleteBook",
-        "parameters": [
-          {
-            "description": "id книги, которую надо удалить",
-            "in": "path",
-            "name": "bookId",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Теперь в базе данных нет книги с таким id"
@@ -273,7 +275,7 @@
         }
       }
     },
-    "/person/get": {
+    "/person/all": {
       "get": {
         "summary": "Получить всех людей из бд",
         "operationId": "getAllPersons",
@@ -300,21 +302,22 @@
         }
       }
     },
-    "/person/get/{personId}": {
+    "/person/{personId}": {
+      "summary": "Человек с id равным personId",
+      "parameters": [
+        {
+          "description": "id человека, которого нужно получить",
+          "in": "path",
+          "name": "personId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
       "get": {
         "summary": "Получить человека с таким id",
         "operationId": "getPerson",
-        "parameters": [
-          {
-            "description": "id человека, которого нужно получить",
-            "in": "path",
-            "name": "personId",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Один объект, если нашелся или ничего, если нет",
@@ -333,23 +336,10 @@
             "$ref": "/components/responses/defaultResponse"
           }
         }
-      }
-    },
-    "/person/update/{personId}": {
+      },
       "put": {
         "summary": "Обновить объект person с personId данными из тела запроса",
         "operationId": "updatePerson",
-        "parameters": [
-          {
-            "description": "id человека, которого нужно обновить",
-            "in": "path",
-            "name": "personId",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
         "requestBody": {
           "description": "Данные, которые будут у person после операции",
           "required": true,
@@ -380,23 +370,10 @@
             "$ref": "/components/responses/defaultResponse"
           }
         }
-      }
-    },
-    "/person/delete/{personId}": {
+      },
       "delete": {
         "summary": "Удалить человека с personId",
         "operationId": "deletePerson",
-        "parameters": [
-          {
-            "description": "id человека, которогу нужно удалить",
-            "in": "path",
-            "name": "personId",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Теперь в бд нет человека с таким id"
