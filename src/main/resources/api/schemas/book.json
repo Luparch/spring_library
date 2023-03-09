@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app.Lup.org/schemas/book",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "authors": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "/api/schemas/author.json"
+      }
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

@@ -1,0 +1,610 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Учебный проект \"библиотека\"",
+    "summary": "Система управления библиотечными записями",
+    "description": "Используется для хранения информации и поддержания непротиворечивого состояния базы данных библиотеки",
+    "contact": {
+      "name": "Разработчик",
+      "email": "verevkins27@gmail.com"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "localhost:{port}/{basePath}",
+      "description": "Сервер разработки",
+      "variables": {
+        "port": {
+          "enum": [
+            "9046",
+            "9099"
+          ],
+          "default": "9046"
+        },
+        "basePath": {
+          "default": "api/v1"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/book/create": {
+      "post": {
+        "summary": "Создает книгу",
+        "operationId": "createBook",
+        "requestBody": {
+          "description": "Объект book, который нужно создать",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "/components/schemas/book"
+              },
+              "examples": {
+                "full": {
+                  "$ref": "/components/examples/fullBook"
+                },
+                "nullsOmitted": {
+                  "$ref": "/components/examples/nullsInAuthorsOmittedBook"
+                },
+                "authorsOmitted": {
+                  "$ref": "/components/examples/authorsOmittedBook"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Теперь книга есть в базе данных"
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/book/get": {
+      "get": {
+        "summary": "Получить все книги, которые, если заданы параметры, написаны автором",
+        "operationId": "getAllBooks",
+        "parameters": [
+          {
+            "description": "Имя автора",
+            "in": "header",
+            "name": "name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Фамилия автора",
+            "in": "header",
+            "name": "secondName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Отчество автора",
+            "in": "header",
+            "name": "patronymic",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Массив объектов book",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "/components/schemas/book"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/book/get/{bookId}": {
+      "get": {
+        "summary": "Получить книгу с bookId",
+        "operationId": "getBook",
+        "parameters": [
+          {
+            "description": "id книги, которую нужно получить",
+            "in": "path",
+            "name": "bookId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Запрошенный объект book или пусто, если такого объекта нет",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "/components/schemas/book"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/book/update/{bookId}": {
+      "put": {
+        "summary": "Обновить книгу с bookId данными из тела запроса",
+        "operationId": "updateBookById",
+        "parameters": [
+          {
+              "description": "id книги, которую надо обновить",
+              "in": "path",
+              "name": "bookId",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+          }
+        ],
+        "requestBody": {
+          "description": "Данные для обновления объекта. id берется из пути",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "/components/schemas/book"
+              },
+              "examples": {
+                "full": {
+                  "$ref": "/components/examples/fullBook"
+                },
+                "nullsOmitted": {
+                  "$ref": "/components/examples/nullsInAuthorsOmittedBook"
+                },
+                "authorsOmitted": {
+                  "$ref": "/components/examples/authorsOmittedBook"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Теперь книга с таким id имеет данные из тела"
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/book/delete/{bookId}": {
+      "delete": {
+        "summary": "Удалить книгу с таким id",
+        "operationId": "deleteBook",
+        "parameters": [
+          {
+            "description": "id книги, которую надо удалить",
+            "in": "path",
+            "name": "bookId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Теперь в базе данных нет книги с таким id"
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/person/create": {
+      "post": {
+        "summary": "Создать человека с данными из тела запроса",
+        "operationId": "createPerson",
+        "requestBody": {
+          "description": "объект person, который нужно создать",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "/components/schemas/person"
+              },
+              "examples": {
+                "full": {
+                  "$ref": "/components/examples/fullPerson"
+                },
+                "nullsOmitted": {
+                  "$ref": "components/examples/nullsOmittedPerson"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Теперь человек с такими данными есть в бд"
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/person/get": {
+      "get": {
+        "summary": "Получить всех людей из бд",
+        "operationId": "getAllPersons",
+        "responses": {
+          "200": {
+            "description": "Массив объектов person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "/components/schemas/person"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/person/get/{personId}": {
+      "get": {
+        "summary": "Получить человека с таким id",
+        "operationId": "getPerson",
+        "parameters": [
+          {
+            "description": "id человека, которого нужно получить",
+            "in": "path",
+            "name": "personId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Один объект, если нашелся или ничего, если нет",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "/components/schemas/person"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/person/update/{personId}": {
+      "put": {
+        "summary": "Обновить объект person с personId данными из тела запроса",
+        "operationId": "updatePerson",
+        "parameters": [
+          {
+            "description": "id человека, которого нужно обновить",
+            "in": "path",
+            "name": "personId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Данные, которые будут у person после операции",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "/components/schemas/person"
+              },
+              "examples": {
+                "full": {
+                  "$ref": "/components/examples/fullPerson"
+                },
+                "nullsOmitted": {
+                  "$ref": "components/examples/nullsOmittedPerson"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Теперь person с personId имеет данные из тела"
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/person/delete/{personId}": {
+      "delete": {
+        "summary": "Удалить человека с personId",
+        "operationId": "deletePerson",
+        "parameters": [
+          {
+            "description": "id человека, которогу нужно удалить",
+            "in": "path",
+            "name": "personId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Теперь в бд нет человека с таким id"
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/person/{personId}/borrow/{bookId}": {
+      "parameters": [
+        {
+          "description": "id человека, который берет книгу",
+          "in": "path",
+          "name": "personId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "description": "id книги, которую берет человек",
+          "in": "path",
+          "name": "bookId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Сохранить информация о том, что человек взял книгу",
+        "operationId": "borrowBook",
+        "responses": {
+          "200": {
+            "description": "Информация сохранена"
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Удалить информацию о том, что человек взял книгу",
+        "operationId": "returnBook",
+        "responses": {
+          "200": {
+            "description": "Информация удалена"
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    },
+    "/person/books": {
+      "get": {
+        "description": "Получить массив книг, которые в данный момент одолжены человеком",
+        "operationId": "getBorrowedBooks",
+        "responses": {
+          "200": {
+            "description": "В теле массив книг, взятых человеком",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "/components/schemas/book"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "/components/responses/badRequestResponse"
+          },
+          "default": {
+            "$ref": "/components/responses/defaultResponse"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "defaultResponse": {
+        "description": "Непредвиденное поведение"
+      },
+      "badRequestResponse": {
+        "description": "Ошибка на стороне сервера. Возможно неправильный запрос"
+      }
+    },
+    "schemas": {
+      "book": {
+        "type": "object",
+        "properties": {
+          "title": "string",
+          "authors": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "ref": "/components/schemas/author"
+            }
+          }
+        },
+        "required": ["title"]
+      },
+      "author": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "secondName": {
+            "type": "string",
+            "default": null
+          },
+          "patronymic": {
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "person": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "secondName": {
+            "type": "string",
+            "default": null
+          },
+          "patronymic": {
+            "type": "string",
+            "default": null
+          },
+          "birtDay": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "name", "birtDay"
+        ]
+      }
+    },
+    "examples": {
+      "fullBook": {
+        "summary": "Книга с указанием всех полей",
+        "value": {
+          "title": "Евгений Онегин",
+          "authors": [
+            {
+              "name": "Александр",
+              "secondName": "Пушкин",
+              "patronymic": "Сергеевич"
+            }
+          ]
+        }
+      },
+      "nullsInAuthorsOmittedBook": {
+        "summary": "Поля, для которых нет значения, пропущены. Обязательно только title и name для authors",
+        "value": {
+          "title": "Искусство войны",
+          "authors": [
+            {
+              "name": "Сунь-Цзы"
+            }
+          ]
+        }
+      },
+      "authorsOmittedBook": {
+        "summary": "Поле authors не обязательно. Тогда считается, что автор неизвестен или его нет (народное творчество)",
+        "value": {
+          "title": "Мифы древней Греции"
+        }
+      },
+      "fullPerson": {
+        "summary": "Человек с указанием всех полей",
+        "value": {
+          "name": "Павел",
+          "secondName": "Петрушкин",
+          "patronymic": "Акакиевич",
+          "birthDay": "2000-01-20"
+        }
+      },
+      "nullsOmittedPerson": {
+        "summary": "Нет отчества",
+        "value": {
+          "name": "Павел",
+          "secondName": "Петрушкин",
+          "birthDay": "2000-01-20"
+        }
+      }
+    }
+  }
+}

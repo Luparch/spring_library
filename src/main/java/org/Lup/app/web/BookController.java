@@ -31,11 +31,10 @@ public class BookController {
 
     @GetMapping("/get")
     public List<BookResponse> getAllBooks(){
-        List<BookResponse> list = facade.getAllBooks();
-        return list;
+        return facade.getAllBooks();
     }
 
-    @GetMapping(value = "/get", params = "{name, secondName, patronymic}")
+    @GetMapping(value = "/get", params = {"name", "secondName", "patronymic"})
     public List<BookResponse> getBooksByAuthor(@RequestParam("name") String name,
                                                @RequestParam("secondName") String secondName,
                                                @RequestParam("patronymic") String patronymic){
@@ -43,8 +42,7 @@ public class BookController {
         request.setName(name);
         request.setSecondName(secondName);
         request.setPatronymic(patronymic);
-        List<BookResponse> list = facade.getBooksByAuthor(request);
-        return list;
+        return facade.getBooksByAuthor(request);
     }
 
     @DeleteMapping("/delete/{bookId}")
@@ -52,12 +50,12 @@ public class BookController {
         facade.deleteBookById(bookId);
     }
 
-    @PutMapping("/update/{bookId}")
+    @PutMapping(value = "/update/{bookId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateBook(@PathVariable Integer bookId, @Validated @RequestBody BookRequest request) {
         facade.updateBookById(bookId, request);
     }
 
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createBook(@Validated @RequestBody BookRequest request) {
         facade.createBook(request);
     }

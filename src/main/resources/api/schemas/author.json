@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app.Lup.org/schemas/author",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "secondName": {
+      "type": "string",
+      "default": null
+    },
+    "patronymic": {
+      "type": "string",
+      "default": null
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

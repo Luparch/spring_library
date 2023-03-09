@@ -38,12 +38,12 @@ public class PersonController {
         facade.deletePersonById(personId);
     }
 
-    @PutMapping("/update/{personId}")
+    @PutMapping(value = "/update/{personId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updatePerson(@PathVariable Integer personId, @Validated @RequestBody PersonRequest request){
         facade.updatePersonById(personId, request);
     }
 
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createPerson(@RequestBody @Validated PersonRequest request){
         facade.createPerson(request);
     }
@@ -53,7 +53,7 @@ public class PersonController {
         facade.borrowBook(personId, bookId);
     }
 
-    @DeleteMapping("/{personId}/return/{bookId}")
+    @DeleteMapping("/{personId}/borrow/{bookId}")
     public void returnBook(@PathVariable Integer personId, @PathVariable Integer bookId){
         facade.returnBook(personId, bookId);
     }

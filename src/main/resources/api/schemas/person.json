@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app.Lup.org/schemas/person",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "secondName": {
+      "type": "string",
+      "default": null
+    },
+    "patronymic": {
+      "type": "string",
+      "default": null
+    },
+    "birtDay": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "name", "birtDay"
+  ]
+}
