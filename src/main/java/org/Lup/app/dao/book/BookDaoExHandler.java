@@ -3,6 +3,7 @@ package org.Lup.app.dao.book;
 import org.Lup.app.dto.AuthorDto;
 import org.Lup.app.dto.BookDto;
 import org.Lup.app.exception.DomainException;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Primary
 public class BookDaoExHandler implements BookDao {
 
     private final RawBookDao dao;

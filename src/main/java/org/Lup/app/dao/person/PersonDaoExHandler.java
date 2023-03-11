@@ -2,12 +2,14 @@ package org.Lup.app.dao.person;
 
 import org.Lup.app.dto.PersonDto;
 import org.Lup.app.exception.DomainException;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.*;
 
 @Repository
+@Primary
 public class PersonDaoExHandler implements PersonDao {
 
     private final RawPersonDao dao;
