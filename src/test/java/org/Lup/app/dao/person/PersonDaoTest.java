@@ -22,7 +22,7 @@ public class PersonDaoTest {
     private static final String user = "postgres";
     private static final String password = "Ytp1288";
     private static PGDataSource ds;
-    private static PersonDao dao;
+    private static PersonDaoExHandler dao;
 
     private static PersonDto person;
 
@@ -34,7 +34,7 @@ public class PersonDaoTest {
         ds.setDatabaseName(db);
         ds.setUser(user);
         ds.setPassword(password);
-        dao = new PersonDao(new RawPersonDao(ds));
+        dao = new PersonDaoExHandler(new RawPersonDao(ds));
     }
 
     @BeforeEach

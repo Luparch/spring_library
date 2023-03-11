@@ -1,5 +1,6 @@
 package org.Lup.app.service;
 
+import org.Lup.app.dto.BookDto;
 import org.Lup.app.dto.PersonDto;
 
 import java.util.List;
@@ -21,4 +22,5 @@ public interface PersonService {
 
     void returnBook(Integer personId, Integer bookId);
 
+    List<Integer> borrowedBooks(Integer personId);
 }

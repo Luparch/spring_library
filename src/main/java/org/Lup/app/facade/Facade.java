@@ -102,4 +102,8 @@ public class Facade {
     public void returnBook(Integer personId, Integer bookId) throws DomainException {
         personService.returnBook(personId, bookId);
     }
+
+    public List<Integer> getBooksBorrowedByPerson(Integer personId){
+        return personService.borrowedBooks(personId);
+    }
 }

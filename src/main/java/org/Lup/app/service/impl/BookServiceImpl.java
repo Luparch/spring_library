@@ -3,7 +3,6 @@ package org.Lup.app.service.impl;
 import org.Lup.app.dao.book.BookDao;
 import org.Lup.app.dto.AuthorDto;
 import org.Lup.app.dto.BookDto;
-import org.Lup.app.exception.DomainException;
 import org.Lup.app.service.BookService;
 import org.springframework.stereotype.Service;
 

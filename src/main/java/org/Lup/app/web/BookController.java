@@ -1,7 +1,5 @@
 package org.Lup.app.web;
 
-import org.Lup.app.dto.AuthorDto;
-import org.Lup.app.exception.DomainException;
 import org.Lup.app.facade.Facade;
 import org.Lup.app.web.constant.WebConstant;
 import org.Lup.app.web.request.AuthorRequest;
@@ -24,18 +22,17 @@ public class BookController {
         this.facade = facade;
     }
 
-    @GetMapping("/get/{bookId}")
+    @GetMapping("/{bookId}")
     public Optional<BookResponse> getBook(@PathVariable Integer bookId){
         return facade.getBookById(bookId);
     }
 
-    @GetMapping("/get")
+    @GetMapping("/all")
     public List<BookResponse> getAllBooks(){
-        List<BookResponse> list = facade.getAllBooks();
-        return list;
+        return facade.getAllBooks();
     }
 
-    @GetMapping(value = "/get", params = "{name, secondName, patronymic}")
+    @GetMapping(value = "/byAuthor", params = {"name", "secondName", "patronymic"})
     public List<BookResponse> getBooksByAuthor(@RequestParam("name") String name,
                                                @RequestParam("secondName") String secondName,
                                                @RequestParam("patronymic") String patronymic){
@@ -43,16 +40,15 @@ public class BookController {
         request.setName(name);
         request.setSecondName(secondName);
         request.setPatronymic(patronymic);
-        List<BookResponse> list = facade.getBooksByAuthor(request);
-        return list;
+        return facade.getBooksByAuthor(request);
     }
 
-    @DeleteMapping("/delete/{bookId}")
+    @DeleteMapping("/{bookId}")
     public void deleteBook(@PathVariable Integer bookId){
         facade.deleteBookById(bookId);
     }
 
-    @PutMapping("/update/{bookId}")
+    @PutMapping("/{bookId}")
     public void updateBook(@PathVariable Integer bookId, @Validated @RequestBody BookRequest request) {
         facade.updateBookById(bookId, request);
     }

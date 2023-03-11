@@ -22,7 +22,7 @@ public class BookDaoTest {
     private static final String user = "postgres";
     private static final String password = "Ytp1288";
     private static PGDataSource ds;
-    private static BookDao dao;
+    private static BookDaoExHandler dao;
 
 
     private Map<String, Class<?>> map;
@@ -37,7 +37,7 @@ public class BookDaoTest {
         ds.setDatabaseName(db);
         ds.setUser(user);
         ds.setPassword(password);
-        dao = new BookDao(new RawBookDao(ds));
+        dao = new BookDaoExHandler(new RawBookDao(ds));
     }
 
     @BeforeEach

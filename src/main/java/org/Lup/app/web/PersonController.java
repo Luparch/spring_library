@@ -1,5 +1,6 @@
 package org.Lup.app.web;
 
+import org.Lup.app.dto.BookDto;
 import org.Lup.app.facade.Facade;
 import org.Lup.app.web.constant.WebConstant;
 import org.Lup.app.web.request.PersonRequest;
@@ -22,23 +23,22 @@ public class PersonController {
         this.facade = facade;
     }
 
-    @GetMapping("/get/{personId}")
+    @GetMapping("/{personId}")
     public Optional<PersonResponse> getPerson(@PathVariable Integer personId){
         return facade.getPersonById(personId);
     }
 
-    @GetMapping("/get")
+    @GetMapping("/all")
     public List<PersonResponse> getAllPersons(){
-        List<PersonResponse> list = facade.getAllPersons();
-        return list;
+        return facade.getAllPersons();
     }
 
-    @DeleteMapping("/delete/{personId}")
+    @DeleteMapping("/{personId}")
     public void deletePerson(@PathVariable Integer personId){
         facade.deletePersonById(personId);
     }
 
-    @PutMapping("/update/{personId}")
+    @PutMapping("/{personId}")
     public void updatePerson(@PathVariable Integer personId, @Validated @RequestBody PersonRequest request){
         facade.updatePersonById(personId, request);
     }
@@ -53,9 +53,14 @@ public class PersonController {
         facade.borrowBook(personId, bookId);
     }
 
-    @DeleteMapping("/{personId}/return/{bookId}")
+    @DeleteMapping("/{personId}/borrow/{bookId}")
     public void returnBook(@PathVariable Integer personId, @PathVariable Integer bookId){
         facade.returnBook(personId, bookId);
+    }
+
+    @GetMapping("/{personId}/books")
+    public List<Integer> getBorrowedBooks(@PathVariable Integer personId){
+        return facade.getBooksBorrowedByPerson(personId);
     }
 
 }

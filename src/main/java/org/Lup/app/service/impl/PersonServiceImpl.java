@@ -52,5 +52,10 @@ public class PersonServiceImpl implements PersonService {
     public void returnBook(Integer personId, Integer bookId){
         personDao.returnBook(personId, bookId);
     }
-    
+
+    @Override
+    public List<Integer> borrowedBooks(Integer personId) {
+        return personDao.booksBorrowedByPerson(personId);
+    }
+
 }
